@@ -16,7 +16,7 @@ namespace PinFunctions {
 */
 class PWMPin {
 public:
-	PWMPin(uint32_t pinNr, uint32_t freqInHz, uint32_t resolution);
+	PWMPin(uint32_t pinNr, uint32_t freqInHz);
 	void SetFrequency(uint32_t freqInHz);
 	void SetDutyCycle(uint32_t percentage);
 	void Pause(bool pauseOrResume);

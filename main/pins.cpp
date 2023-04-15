@@ -8,11 +8,11 @@
 
 const char* TAG = "PIN MANAGER:";
 
-
 bool PinFunctions::SetPin(uint32_t pinNr, bool enableOrNot)
 {
-    ESP_LOGI(TAG, "pinNr %d is set to enable? %d", pinNr, enableOrNot);
-	return gpio_set_level(pinNr, enableOrNot) == ESP_OK;
+    ESP_LOGI(TAG, "pinNr %lu is set to enable? %d", pinNr, enableOrNot);
+    gpio_set_direction((gpio_num_t)pinNr, GPIO_MODE_OUTPUT);
+    return gpio_set_level((gpio_num_t)pinNr, enableOrNot) == ESP_OK;
 }
 
 bool PinFunctions::EnablePin(uint32_t pinNr)
@@ -27,9 +27,8 @@ bool PinFunctions::DisablePin(uint32_t pinNr)
 
 bool PinFunctions::GetPinStatus(uint32_t pinNr)
 {
-	return gpio_get_level(pinNr);
+	return gpio_get_level((gpio_num_t)pinNr);
 }
-
 
 static std::map<ledc_channel_t, bool> occupiedChannel = {
     {LEDC_CHANNEL_0 ,false},
@@ -65,7 +64,7 @@ ledc_timer_t FindUnusedTimer() {
     throw "all timer are used!";
 }
 
-PWMPin::PWMPin(uint32_t pinNr, uint32_t freqInHz, uint32_t resolution)
+PWMPin::PWMPin(uint32_t pinNr, uint32_t freqInHz)
 {
     ESP_LOGI(TAG, "finding unused channel");
     ledc_channel_t channel = FindUnusedChannel();
@@ -75,63 +74,68 @@ PWMPin::PWMPin(uint32_t pinNr, uint32_t freqInHz, uint32_t resolution)
 
     this->freqInHz = freqInHz;
     this->pinNr = pinNr;
-    this->resolution = resolution;
     this->timerNr = timer;
     this->channelNr = channel;
     this->dutyCycleInPercentage = 0;
 
-    ledc_timer_config_t timer_conf;
-    timer_conf.speed_mode = LEDC_HIGH_SPEED_MODE;
-    timer_conf.timer_num = (ledc_timer_t) this->timerNr;
-    timer_conf.freq_hz = this->freqInHz;
-    ledc_timer_bit_t resolutionEnum = (ledc_timer_bit_t) clamp<uint32_t>(this->resolution, 0, 20);
-    timer_conf.duty_resolution = resolutionEnum;
-    ledc_timer_config(&timer_conf);
 
-    ledc_channel_config_t ledc_conf;
-    ledc_conf.gpio_num = this->pinNr;
-    ledc_conf.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_conf.channel = (ledc_channel_t) this->channelNr;
+    ledc_channel_config_t ledc_conf = {};
+    ledc_conf.channel = (ledc_channel_t)this->channelNr;//LEDC_CHANNEL_0;
+    ledc_conf.gpio_num = (gpio_num_t)this->pinNr;
+    ledc_conf.speed_mode = LEDC_LOW_SPEED_MODE;
+    ledc_conf.timer_sel = (ledc_timer_t)this->timerNr; //LEDC_TIMER_0;
     ledc_conf.intr_type = LEDC_INTR_DISABLE;
-    ledc_conf.timer_sel = (ledc_timer_t) this->timerNr;
-    ledc_conf.duty = this->dutyCycleInPercentage;
-    ledc_channel_config(&ledc_conf);
+    ledc_conf.duty = 0;
+    ledc_conf.hpoint = 0;
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_conf));
+
+    ledc_timer_config_t timer_conf = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_13_BIT,
+        .timer_num = (ledc_timer_t)this->timerNr,//LEDC_TIMER_0,
+        .freq_hz = 1000,
+        .clk_cfg = LEDC_AUTO_CLK
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&timer_conf));
 
     occupiedTimer[timer] = true;
     occupiedChannel[channel] = true;
 
-    ESP_LOGI(TAG, "creating PWM pinNr %d at freq %d at resolution %d", this->pinNr, this->freqInHz, this->resolution);
+    ESP_LOGI(TAG, "creating PWM pinNr %lu at freq %lu at resolution %d", this->pinNr, this->freqInHz, (int)LEDC_TIMER_13_BIT);
+    this->Pause(true);
 }
 
 void PWMPin::SetFrequency(uint32_t freqInHz)
 {
     this->freqInHz = freqInHz;
-    ledc_set_freq(LEDC_HIGH_SPEED_MODE, (ledc_timer_t)timerNr, this->freqInHz);
-    ESP_LOGI(TAG, "setting frequency for pinNr %d frequency %d hz", this->pinNr, this->freqInHz);
+    ledc_set_freq(LEDC_LOW_SPEED_MODE, (ledc_timer_t)timerNr, this->freqInHz);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)this->channelNr);
+    ESP_LOGI(TAG, "setting frequency for pinNr %lu frequency %lu hz", this->pinNr, this->freqInHz);
 }
 
 void PWMPin::SetDutyCycle(uint32_t percentage)
 {
     this->dutyCycleInPercentage = percentage;
-    uint32_t dutyCycle = (uint32_t)((this->dutyCycleInPercentage * ((1 << (ledc_timer_bit_t) this->resolution) - 1)) / 100);
-    ledc_set_duty(LEDC_HIGH_SPEED_MODE, (ledc_channel_t)channelNr, dutyCycle);
-    ESP_LOGI(TAG, "setting duty cycle for pinNr %d duty cycle in %d%% duty cycle in integer %d", this->pinNr, this->dutyCycleInPercentage, dutyCycle);
+    uint32_t dutyCycle = map<uint32_t>(this->dutyCycleInPercentage, 0, 100, 0, 1023); 
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)this->channelNr, dutyCycle);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)this->channelNr);
+    //ESP_LOGI(TAG, "setting duty cycle for pinNr %lu duty cycle in %lu%% duty cycle in integer %lu", this->pinNr, this->dutyCycleInPercentage, dutyCycle);
 }
 
 void PWMPin::Pause(bool pauseOrResume)
 {
     ledc_channel_t channel = (ledc_channel_t)this->channelNr;
-    uint32_t dutyCycle = (uint32_t)((this->dutyCycleInPercentage * ((1 << (ledc_timer_bit_t) this->resolution) - 1)) / 100);
+    uint32_t dutyCycle = map<uint32_t>(this->dutyCycleInPercentage, 0, 100, 0, 1023);
     
     if (pauseOrResume)
     {
-        ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, 0);
-        ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+        ledc_set_duty(LEDC_LOW_SPEED_MODE, channel, 0);
+        ledc_update_duty(LEDC_LOW_SPEED_MODE, channel);
     }
     else
     {
-        ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, dutyCycle);
-        ledc_update_duty(LEDC_HIGH_SPEED_MODE, channel);
+        ledc_set_duty(LEDC_LOW_SPEED_MODE, channel, dutyCycle);
+        ledc_update_duty(LEDC_LOW_SPEED_MODE, channel);
     }
 }
 
@@ -144,7 +148,7 @@ PWMPin::~PWMPin()
 {
     occupiedTimer[(ledc_timer_t)this->timerNr] = false;
     occupiedChannel[(ledc_channel_t)this->channelNr] = false;
-    ESP_LOGI(TAG, "PWM pin destroyed pinNr %d", this->pinNr);
-    ESP_LOGI(TAG, "removing occupied timer %d and channelNr", this->timerNr, this->channelNr);
+    ESP_LOGI(TAG, "PWM pin destroyed pinNr %lu", this->pinNr);
+    ESP_LOGI(TAG, "removing occupied timer %lu and channelNr %lu", this->timerNr, this->channelNr);
 
 }
