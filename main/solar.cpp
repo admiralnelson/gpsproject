@@ -75,9 +75,12 @@ const uint32_t PIN_CHANNEL_A_FORWARD = 5;
 const uint32_t PIN_CHANNEL_A_BACKWARD = 17;
 const uint32_t PIN_CHANNEL_B_FORWARD = 16;
 const uint32_t PIN_CHANNEL_B_BACKWARD = 4;
-const int FREQUENCY = 40;
+const int FREQUENCY = 25000;
 
-
+//move.A.forward 01.11.34   : 10 derajat
+// move.B.backward 01.12.79 : 20 derajat
+//move.B.forward 01.13.00   : 20 derajat
+//move.B.backward 01.10.51  : 25 derajat
 void app_main()
 {
 	ConfigureStdin();
