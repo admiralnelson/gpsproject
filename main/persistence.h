@@ -5,7 +5,7 @@
 
 
 class Persistence {
-public:
+private:
 	struct IntReturn {
 		int Result = 0;
 		bool Existed = false;

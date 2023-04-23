@@ -19,6 +19,7 @@
 #include "sdkconfig.h"
 #include "iostream"
 #include "pins.h"
+#include "motor.h"
 
 #ifdef __INTELLISENSE__
 #pragma diag_suppress 20
@@ -31,23 +32,6 @@ extern "C"
 {
 	void app_main(void);
 }
-
-#pragma pack(push, 1)
-struct TestRGB
-{
-	int R, G, B, A;
-};
-#pragma pack(pop)
-
-struct SmallStructTest
-{
-	int R, G, B;
-};
-
-
-class X {
-	int R, G, B;
-};
 
 esp_err_t ConfigureStdin(void)
 {
@@ -69,84 +53,129 @@ esp_err_t ConfigureStdin(void)
 	return ESP_OK;
 }
 
-const uint32_t PIN_ENABLE_A = 19;
-const uint32_t PIN_ENABLE_B = 18;
-const uint32_t PIN_CHANNEL_A_FORWARD = 5;
-const uint32_t PIN_CHANNEL_A_BACKWARD = 17;
-const uint32_t PIN_CHANNEL_B_FORWARD = 16;
-const uint32_t PIN_CHANNEL_B_BACKWARD = 4;
-const int FREQUENCY = 25000;
-
-//move.A.forward 01.11.34   : 10 derajat
-// move.B.backward 01.12.79 : 20 derajat
+//move.A.forward 01.11.34   : 20 derajat
+// move.A.backward 01.12.79 : 20 derajat
+// 
 //move.B.forward 01.13.00   : 20 derajat
 //move.B.backward 01.10.51  : 25 derajat
 void app_main()
 {
 	ConfigureStdin();
 
-	PWMPin MotorForwardA(PIN_CHANNEL_A_FORWARD, FREQUENCY);
-	PWMPin MotorBackwardA(PIN_CHANNEL_A_BACKWARD, FREQUENCY);
-	PWMPin MotorForwardB(PIN_CHANNEL_B_FORWARD, FREQUENCY);
-	PWMPin MotorBackwardB(PIN_CHANNEL_B_BACKWARD, FREQUENCY);
-
-	MotorForwardA.SetDutyCycle(100);
-	MotorBackwardA.SetDutyCycle(100);
-	MotorForwardB.SetDutyCycle(100);
-	MotorBackwardB.SetDutyCycle(100);
-	
-
-	MotorBackwardA.Pause(true);
-	MotorBackwardB.Pause(true);
-	MotorForwardA.Pause(true);
-	MotorForwardB.Pause(true);
-
-	PinFunctions::EnablePin(PIN_ENABLE_A);
-	PinFunctions::EnablePin(PIN_ENABLE_B);
-
 	std::string command;
+	int DegA = 0;
+	int DegB = 0;
+	//MotorController::Get().Reset();
 
 	std::cout << "enter a command milord: ";
 	while (true)
 	{
 		if (command != "") 
 		{
-			if (command == "move.A.forward")
+			if (command == "deg(a,-20)")
 			{
-				MotorBackwardA.Pause(true);
-				MotorForwardA.SetDutyCycle(100);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(-20);
+				std::cout << "done" << std::endl;
 			}
-			else if (command == "move.A.backward")
+			else if (command == "deg(a,-15)")
 			{
-				MotorForwardA.Pause(true);
-				MotorBackwardA.SetDutyCycle(100);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(-15);
+				std::cout << "done" << std::endl;
 			}
-			else if (command == "stop.A")
+			else if (command == "deg(a,-10)")
 			{
-				MotorBackwardA.Pause(true);
-				MotorForwardA.Pause(true);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(-10);
+				std::cout << "done" << std::endl;
 			}
-			else if (command == "move.B.forward")
+			else if (command == "deg(a,0)")
 			{
-				MotorBackwardB.Pause(true);
-				MotorForwardB.SetDutyCycle(100);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(0);
+				std::cout << "done" << std::endl;
 			}
-			else if (command == "move.B.backward")
+			else if (command == "deg(a,2)")
 			{
-				MotorForwardB.Pause(true);
-				MotorBackwardB.SetDutyCycle(100);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(2);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,-2)")
+			{
+				MotorController::Get().SetAToDeg(-2);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,5)")
+			{
+				MotorController::Get().SetAToDeg(5);
+				std::cout << "done" << std::endl;
 			}
 
-			else if (command == "stop.B")
+			else if (command == "deg(a,10)")
 			{
-				MotorBackwardB.Pause(true);
-				MotorForwardB.Pause(true);
-				std::cout << command << std::endl;
+				MotorController::Get().SetAToDeg(10);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,15)")
+			{
+				MotorController::Get().SetAToDeg(15);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,20)")
+			{
+				MotorController::Get().SetAToDeg(20);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "a+")
+			{
+				MotorController::Get().StepAForward();
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "a-")
+			{
+				MotorController::Get().StepABackward();
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "b+")
+			{
+				MotorController::Get().StepBForward();
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "b-")
+			{
+				MotorController::Get().StepBBackward();
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "clear")
+			{
+				MotorController::Get().DebugClearMemory();
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,10)")
+			{
+				MotorController::Get().SetAToDeg(10);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(a,0)")
+			{
+				MotorController::Get().SetAToDeg(0);
+				std::cout << "done" << std::endl;
+			}
+			//else if (command == "deg(b, 20)")
+			//{
+			//	MotorController::Get().SetBToDeg(20);
+			//	std::cout << "done" << std::endl;
+			//}
+			//else if (command == "deg(b,-25)")
+			//{
+			//	MotorController::Get().SetBToDeg(-25);
+			//	std::cout << "done" << std::endl;
+			//}
+			//else if (command == "reset")
+			//{
+			//	MotorController::Get().Reset();
+			//	std::cout << "done" << std::endl;
+			//}
+			else
+			{
+
 			}
 			command = "";
 		}

@@ -1,1 +1,83 @@
 #pragma once
+#include "pins.h"
+#include "stdint.h"
+#include "memory"
+
+const uint32_t PIN_ENABLE_FORWARD = 18;
+const uint32_t PIN_ENABLE_BACKWARD = 19;
+const uint32_t PIN_CHANNEL_A_FORWARD = 5;
+const uint32_t PIN_CHANNEL_A_BACKWARD = 17;
+const uint32_t PIN_CHANNEL_B_FORWARD = 16;
+const uint32_t PIN_CHANNEL_B_BACKWARD = 4;
+const int FREQUENCY = 25000;
+
+const int A_FORWARD_TIME = 33;
+const int A_BACKWARD_TIME = 43;
+
+const int B_FORWARD_TIME = 73;
+const int B_BACKWARD_TIME = 70;
+
+const int A_MAX_FORWARD_RANGE_DEG = 20;
+const int A_MAX_BACKWARD_RANGE_DEG = 20;
+
+const int B_MAX_FORWARD_RANGE_DEG = 20;
+const int B_MAX_BACKWARD_RANGE_DEG = 25;
+
+const float A_FORWARD_RATE = (float) A_MAX_FORWARD_RANGE_DEG / (float) A_FORWARD_TIME;
+const float A_BACKWARD_RATE = (float) A_MAX_BACKWARD_RANGE_DEG / (float)A_BACKWARD_TIME;
+
+const float B_FORWARD_RATE = (float) B_MAX_FORWARD_RANGE_DEG / (float) B_FORWARD_TIME;
+const float B_BACKWARD_RATE = (float) B_MAX_BACKWARD_RANGE_DEG / (float) B_BACKWARD_TIME;
+
+
+
+class MotorController {
+	enum class MotorMovement {
+		Stopped,
+		MotorAMovingPosDeg,
+		MotorAMovingNegDeg,
+		MotorBMovingPosDeg,
+		MotorBMovingNegDeg,
+		Resetting
+	};
+
+public:
+	static MotorController& Get();
+
+	void SetAToDeg(int degrees);
+	void SetBToDeg(int degrees);
+
+	void StepAByDeg(int howManyDegrees);
+
+	void StepAOneDeg();
+	void StepAMinusOneDeg();
+	void StepBOneDeg();
+	void StepBMinusOneDeg();
+
+
+	void StepAForward();
+	void StepABackward();
+	void StepBForward();
+	void StepBBackward();
+
+	void DebugClearMemory();
+
+
+private:
+	void ResetA(int newDegree);
+
+	MotorController();
+	MotorController(MotorController const&) = delete;
+	void operator=(MotorController const&) = delete;
+	
+	std::unique_ptr<PWMPin> MotorAForward;
+	std::unique_ptr<PWMPin> MotorBForward;
+
+	std::unique_ptr<PWMPin> MotorABackward;
+	std::unique_ptr<PWMPin> MotorBBackward;
+
+	MotorMovement MotorMovementStatus = MotorMovement::Stopped;
+
+	int CurrentMotorADegree = 0;
+	int CurrentMotorBDegree = 0;
+};
