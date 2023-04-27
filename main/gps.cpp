@@ -1,4 +1,5 @@
 #include "gps.h"
+#include "iostream"
 #include "common.h"
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -7,6 +8,7 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
+#include "iomanip"
 
 
 
@@ -54,11 +56,11 @@ static void SerialMonitorTask(void* arg)
         // Read data from the UART
         int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
         // Write data back to the UART
-        uart_write_bytes(ECHO_UART_PORT_NUM, (const char*)data, len);
+        /*uart_write_bytes(ECHO_UART_PORT_NUM, (const char*)data, len);*/
         if (len) {
             data[len] = '\0';
             std::copy(data, data + BUF_SIZE, ptrToGps->Buffer.begin());
-            ESP_LOGI(GPS_TAG, "Recv str: %s", (char*)data);
+            ptrToGps->Update(len);
         }
     }
 }
@@ -81,11 +83,38 @@ void Gps::SetupSerial()
 
 void Gps::SetupGps()
 {
+    
+    this->gpsService->onUpdate += [this]() {
+        nmea::GPSService& gps = *(this->gpsService);
+        std::cout << (gps.fix.locked() ? "[*] " : "[ ] ") << std::setw(2) << std::setfill(' ') << gps.fix.trackingSatellites << "/" << std::setw(2) << std::setfill(' ') << gps.fix.visibleSatellites << " ";
+        std::cout << std::fixed << std::setprecision(2) << std::setw(5) << std::setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
+        std::cout << std::fixed << std::setprecision(2) << std::setw(6) << std::setfill(' ') << gps.fix.speed << " km/h [" << nmea::GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
+        std::cout << std::fixed << std::setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
+        std::cout << "+/- " << std::setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+        std::cout << std::endl;
+    };
 }
 
 Gps::Gps()
 {
+    this->nmeaParser.reset(new nmea::NMEAParser());
+    this->gpsService.reset(new nmea::GPSService(*(this->nmeaParser.get())));
     ESP_LOGI(GPS_TAG, "initalising buffer");
     this->SetupSerial();
+    this->SetupGps();
 }
 
+void Gps::Update(size_t length)
+{
+    try
+    {
+        this->nmeaParser->readBuffer((uint8_t*)this->Buffer.data(),length);
+    }
+    catch(nmea::NMEAParseError & e)
+    {
+        ESP_LOGE(GPS_TAG, "parse error: %s", e.message.c_str());
+    }
+
+
+ 
+}
