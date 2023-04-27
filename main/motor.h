@@ -3,12 +3,12 @@
 #include "stdint.h"
 #include "memory"
 
-const uint32_t PIN_ENABLE_FORWARD = 18;
-const uint32_t PIN_ENABLE_BACKWARD = 19;
-const uint32_t PIN_CHANNEL_A_FORWARD = 5;
-const uint32_t PIN_CHANNEL_A_BACKWARD = 17;
-const uint32_t PIN_CHANNEL_B_FORWARD = 16;
-const uint32_t PIN_CHANNEL_B_BACKWARD = 4;
+const uint32_t PIN_ENABLE_FORWARD = 33;
+const uint32_t PIN_ENABLE_BACKWARD = 25;
+const uint32_t PIN_CHANNEL_A_FORWARD = 26;
+const uint32_t PIN_CHANNEL_A_BACKWARD = 27;
+const uint32_t PIN_CHANNEL_B_FORWARD = 14;
+const uint32_t PIN_CHANNEL_B_BACKWARD = 12;
 const int FREQUENCY = 25000;
 
 const int A_FORWARD_TIME = 33;

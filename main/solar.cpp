@@ -20,6 +20,7 @@
 #include "iostream"
 #include "pins.h"
 #include "motor.h"
+#include "gps.h"
 
 #ifdef __INTELLISENSE__
 #pragma diag_suppress 20
@@ -157,6 +158,11 @@ void app_main()
 			{
 				MotorController::Get().SetAToDeg(0);
 				std::cout << "done" << std::endl;
+			}
+			else if (command == "gpstest")
+			{
+				std::cout << "gps enabled" << std::endl;
+				Gps::Get();
 			}
 			//else if (command == "deg(b, 20)")
 			//{
