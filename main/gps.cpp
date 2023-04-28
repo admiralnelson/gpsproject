@@ -21,7 +21,7 @@
 
 #define ECHO_UART_PORT_NUM      (2)
 #define ECHO_UART_BAUD_RATE     (9600)
-#define ECHO_TASK_STACK_SIZE    (2048)
+#define ECHO_TASK_STACK_SIZE    (2048*5)
 
 static const char* GPS_TAG = "gps service";
 
