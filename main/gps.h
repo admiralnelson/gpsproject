@@ -14,6 +14,10 @@ public:
 	std::array<char, BUF_SIZE> Buffer;
 
 	void Update(size_t length);
+	double GetLon();
+	double GetLat();
+	long GetTime();
+	long GetDate();
 
 private:
 	bool bSerialIsActive = false;

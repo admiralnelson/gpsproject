@@ -1,7 +1,8 @@
 #ifndef __HELIOS_H
 #define __HELIOS_H
 
-#include <Arduino.h>
+#include <iostream>
+#include <cmath>
 
 #define pi    3.14159265358979323846
 #define twopi (2*pi)

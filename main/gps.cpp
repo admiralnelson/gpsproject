@@ -118,3 +118,18 @@ void Gps::Update(size_t length)
 
  
 }
+
+double Gps::GetLon()
+{
+    return this->gpsService->fix.longitude;
+}
+
+double Gps::GetLat()
+{
+    return this->gpsService->fix.altitude;
+}
+
+long Gps::GetTime()
+{
+    return this->gpsService->fix.timestamp.getTime();
+}

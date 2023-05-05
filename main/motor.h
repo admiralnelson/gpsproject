@@ -11,9 +11,6 @@ const uint32_t PIN_CHANNEL_B_FORWARD = 14;
 const uint32_t PIN_CHANNEL_B_BACKWARD = 12;
 const int FREQUENCY = 25000;
 
-const int A_FORWARD_TIME = 33;
-const int A_BACKWARD_TIME = 43;
-
 const int B_FORWARD_TIME = 73;
 const int B_BACKWARD_TIME = 70;
 
@@ -23,11 +20,6 @@ const int A_MAX_BACKWARD_RANGE_DEG = 20;
 const int B_MAX_FORWARD_RANGE_DEG = 20;
 const int B_MAX_BACKWARD_RANGE_DEG = 25;
 
-const float A_FORWARD_RATE = (float) A_MAX_FORWARD_RANGE_DEG / (float) A_FORWARD_TIME;
-const float A_BACKWARD_RATE = (float) A_MAX_BACKWARD_RANGE_DEG / (float)A_BACKWARD_TIME;
-
-const float B_FORWARD_RATE = (float) B_MAX_FORWARD_RANGE_DEG / (float) B_FORWARD_TIME;
-const float B_BACKWARD_RATE = (float) B_MAX_BACKWARD_RANGE_DEG / (float) B_BACKWARD_TIME;
 
 
 

@@ -21,6 +21,7 @@
 #include "pins.h"
 #include "motor.h"
 #include "gps.h"
+#include <regex> 
 
 #ifdef __INTELLISENSE__
 #pragma diag_suppress 20
@@ -73,6 +74,9 @@ void app_main()
 	{
 		if (command != "") 
 		{
+			std::regex pattern(R"(^setdate:(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))");
+			std::smatch match;
+
 			if (command == "deg(a,-20)")
 			{
 				MotorController::Get().SetAToDeg(-20);
@@ -164,6 +168,20 @@ void app_main()
 				std::cout << "gps enabled" << std::endl;
 				Gps::Get();
 			}
+			else if (command == "showdate")
+			{
+				std::cout << "showdate: " << GetCurrentSystemDateTimeAsString() << std::endl;
+			}
+			else if (std::regex_match(command, match, pattern))
+			{
+				std::string dateTimeString = match[1];
+				bool bSuccess = SetDateAndTime(dateTimeString);
+				if (bSuccess)
+				{
+					std::cout << "set date and time is done milord. current system time is " << GetCurrentSystemDateTimeAsString() << std::endl;
+				}
+			}
+
 			//else if (command == "deg(b, 20)")
 			//{
 			//	MotorController::Get().SetBToDeg(20);
