@@ -22,6 +22,7 @@
 #include "motor.h"
 #include "gps.h"
 #include <regex> 
+#include "solartrackingthread.h"
 
 #ifdef __INTELLISENSE__
 #pragma diag_suppress 20
@@ -77,6 +78,7 @@ void app_main()
 			std::regex pattern(R"(^setdate:(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))");
 			std::smatch match;
 
+			//test untuk motor A
 			if (command == "deg(a,-20)")
 			{
 				MotorController::Get().SetAToDeg(-20);
@@ -128,6 +130,61 @@ void app_main()
 				MotorController::Get().SetAToDeg(20);
 				std::cout << "done" << std::endl;
 			}
+
+			//test untuk motor B
+			else if (command == "deg(b,-20)")
+			{
+				MotorController::Get().SetBToDeg(-20);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,-15)")
+			{
+				MotorController::Get().SetBToDeg(-15);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,-10)")
+			{
+				MotorController::Get().SetBToDeg(-10);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,0)")
+			{
+				MotorController::Get().SetBToDeg(0);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,2)")
+			{
+				MotorController::Get().SetBToDeg(2);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,-2)")
+			{
+				MotorController::Get().SetBToDeg(-2);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,5)")
+			{
+				MotorController::Get().SetBToDeg(5);
+				std::cout << "done" << std::endl;
+			}
+
+			else if (command == "deg(b,10)")
+			{
+				MotorController::Get().SetBToDeg(10);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,15)")
+			{
+				MotorController::Get().SetBToDeg(15);
+				std::cout << "done" << std::endl;
+			}
+			else if (command == "deg(b,20)")
+			{
+				MotorController::Get().SetBToDeg(20);
+				std::cout << "done" << std::endl;
+			}
+
+			//test unutk motor A/B per degrees
 			else if (command == "a+")
 			{
 				MotorController::Get().StepAForward();
@@ -148,19 +205,15 @@ void app_main()
 				MotorController::Get().StepBBackward();
 				std::cout << "done" << std::endl;
 			}
+			else if (command == "resetmotor")
+			{
+				MotorController::Get().SetAToDeg(0);
+				MotorController::Get().SetBToDeg(0);
+				std::cout << "done" << std::endl;
+				}
 			else if (command == "clear")
 			{
 				MotorController::Get().DebugClearMemory();
-				std::cout << "done" << std::endl;
-			}
-			else if (command == "deg(a,10)")
-			{
-				MotorController::Get().SetAToDeg(10);
-				std::cout << "done" << std::endl;
-			}
-			else if (command == "deg(a,0)")
-			{
-				MotorController::Get().SetAToDeg(0);
 				std::cout << "done" << std::endl;
 			}
 			else if (command == "gpstest")
@@ -168,9 +221,37 @@ void app_main()
 				std::cout << "gps enabled" << std::endl;
 				Gps::Get();
 			}
+			else if (command == "hidegps")
+			{
+				std::cout << "hide gps debug" << std::endl;
+				Gps::Get().ShowDebug(false);
+			}
+			else if (command == "showgps")
+			{
+				std::cout << "show gps debug" << std::endl;
+				Gps::Get().ShowDebug(true);
+			}
 			else if (command == "showdate")
 			{
 				std::cout << "showdate: " << GetCurrentSystemDateTimeAsString() << std::endl;
+			}
+			else if (command == "startsolaropen")
+			{
+				SolarTrackingOpenLoop::Get().Start();
+			}
+			else if (command == "stopsolaropen")
+			{
+				SolarTrackingOpenLoop::Get().Stop();
+			}
+			else if (command == "ldrcheck")
+			{
+				int ldr1 = PinFunctions::ReadAnalog2(ADC2_CHANNEL_0);
+				int ldr2 = PinFunctions::ReadAnalog2(ADC2_CHANNEL_3);
+				int ldr3 = PinFunctions::ReadAnalog1(ADC1_CHANNEL_3);
+				int ldr4 = PinFunctions::ReadAnalog1(ADC1_CHANNEL_0);
+
+				std::cout << "in mV: ldr1 " << ldr1 << ", ldr2 " << ldr2 << ", ldr3 " << ldr3 << ", ldr4 " << ldr4 << std::endl;
+
 			}
 			else if (std::regex_match(command, match, pattern))
 			{

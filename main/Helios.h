@@ -24,6 +24,8 @@ class Helios{
 	double ZenithAngle;
 	double Azimuth;
 	double Elevation;
+
+
 };
 #endif
 

@@ -85,13 +85,16 @@ void Gps::SetupGps()
 {
     
     this->gpsService->onUpdate += [this]() {
-        nmea::GPSService& gps = *(this->gpsService);
-        std::cout << (gps.fix.locked() ? "[*] " : "[ ] ") << std::setw(2) << std::setfill(' ') << gps.fix.trackingSatellites << "/" << std::setw(2) << std::setfill(' ') << gps.fix.visibleSatellites << " ";
-        std::cout << std::fixed << std::setprecision(2) << std::setw(5) << std::setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
-        std::cout << std::fixed << std::setprecision(2) << std::setw(6) << std::setfill(' ') << gps.fix.speed << " km/h [" << nmea::GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
-        std::cout << std::fixed << std::setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
-        std::cout << "+/- " << std::setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
-        std::cout << std::endl;
+        if (this->IsDebug())
+        {
+            nmea::GPSService& gps = *(this->gpsService);
+            std::cout << (gps.fix.locked() ? "[*] " : "[ ] ") << std::setw(2) << std::setfill(' ') << gps.fix.trackingSatellites << "/" << std::setw(2) << std::setfill(' ') << gps.fix.visibleSatellites << " ";
+            std::cout << std::fixed << std::setprecision(2) << std::setw(5) << std::setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
+            std::cout << std::fixed << std::setprecision(2) << std::setw(6) << std::setfill(' ') << gps.fix.speed << " km/h [" << nmea::GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
+            std::cout << std::fixed << std::setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
+            std::cout << "+/- " << std::setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+            std::cout << std::endl;
+        }
     };
 }
 
@@ -101,7 +104,12 @@ Gps::Gps()
     this->gpsService.reset(new nmea::GPSService(*(this->nmeaParser.get())));
     ESP_LOGI(GPS_TAG, "initalising buffer");
     this->SetupSerial();
+    this->ShowDebug(true);
     this->SetupGps();
+
+    this->longitudeFilter.reset(new MovingAverageFilter(10));
+    this->latitudeFilter.reset(new MovingAverageFilter(10));
+    this->altitudeFilter.reset(new MovingAverageFilter(10));
 }
 
 void Gps::Update(size_t length)
@@ -114,22 +122,40 @@ void Gps::Update(size_t length)
     {
         ESP_LOGE(GPS_TAG, "parse error: %s", e.message.c_str());
     }
-
-
- 
+    Delay(1000);
 }
 
 double Gps::GetLon()
 {
-    return this->gpsService->fix.longitude;
+    return this->longitudeFilter->Filter(this->gpsService->fix.longitude);
 }
 
 double Gps::GetLat()
 {
-    return this->gpsService->fix.altitude;
+    return this->latitudeFilter->Filter(this->gpsService->fix.latitude);
+}
+
+double Gps::GetAltitute()
+{
+    return this->altitudeFilter->Filter(this->gpsService->fix.altitude);
 }
 
 long Gps::GetTime()
 {
     return this->gpsService->fix.timestamp.getTime();
+}
+
+bool Gps::IsFix()
+{
+    return this->gpsService->fix.locked();
+}
+
+bool Gps::IsDebug()
+{
+    return this->bShowDebug;
+}
+
+void Gps::ShowDebug(bool bIsShowing)
+{
+    this->bShowDebug = bShowDebug;
 }

@@ -1,10 +1,18 @@
 #pragma once
 #include "stdint.h"
+#include "driver/adc.h"
+#include "esp_adc_cal.h"
+
+typedef adc1_channel_t AdcChannel1;
+typedef adc2_channel_t AdcChannel2;
+
 namespace PinFunctions {
 	bool SetPin(uint32_t pinNr, bool enableOrNot);
 	bool EnablePin(uint32_t pinNr);
 	bool DisablePin(uint32_t pinNr);
 	bool GetPinStatus(uint32_t pinNr);
+	int ReadAnalog1(AdcChannel1 pinNr);
+	int ReadAnalog2(AdcChannel2 pinNr);
 
 }
 

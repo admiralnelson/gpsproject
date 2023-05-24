@@ -6,6 +6,11 @@
 #include "map"
 #include "esp_log.h"
 
+#define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
+#define NO_OF_SAMPLES   64          //Multisampling
+
+static const adc_atten_t atten = ADC_ATTEN_DB_0;
+
 const char* PINS_TAG = "PIN MANAGER:";
 
 bool PinFunctions::SetPin(uint32_t pinNr, bool enableOrNot)
@@ -28,6 +33,110 @@ bool PinFunctions::DisablePin(uint32_t pinNr)
 bool PinFunctions::GetPinStatus(uint32_t pinNr)
 {
 	return gpio_get_level((gpio_num_t)pinNr);
+}
+
+static bool bCheckEFuse = false;
+
+void CheckEfuse()
+{
+    if (bCheckEFuse) return;
+    bCheckEFuse = true;
+    
+    //Check TP is burned into eFuse
+    if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK) 
+    {
+        ESP_LOGI(PINS_TAG, "eFuse Two Point: Supported");
+    }
+    else 
+    {
+        ESP_LOGW(PINS_TAG, "eFuse Two Point: NOT supported");
+    }
+
+    //Check Vref is burned into eFuse
+    if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK) 
+    {
+        ESP_LOGI(PINS_TAG, "eFuse Vref: Supported");
+    }
+    else 
+    {
+        ESP_LOGW(PINS_TAG, "eFuse Vref: NOT supported");
+    }
+}
+
+void print_char_val_type(esp_adc_cal_value_t val_type)
+{
+    if (val_type == ESP_ADC_CAL_VAL_EFUSE_TP) {
+        printf("Characterized using Two Point Value\n");
+    }
+    else if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
+        printf("Characterized using eFuse Vref\n");
+    }
+    else {
+        printf("Characterized using Default Vref\n");
+    }
+}
+
+int PinFunctions::ReadAnalog1(AdcChannel1 pinNr)
+{
+    CheckEfuse();
+
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(pinNr, atten);
+
+    esp_adc_cal_characteristics_t adcChars;
+
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, atten, ADC_WIDTH_BIT_12, DEFAULT_VREF, &adcChars);
+    //print_char_val_type(val_type);
+
+    uint32_t adc_reading = 0;
+    //Multisampling
+    for (int i = 0; i < NO_OF_SAMPLES; i++) 
+    {
+        int read = adc1_get_raw(pinNr);
+        if (read == -1)
+        {
+            ESP_LOGW(PINS_TAG, "%s : read failed channel adc 1 nr %d ", __func__, pinNr);
+            return -1;
+        }
+        adc_reading += read;
+    }
+    adc_reading /= NO_OF_SAMPLES;
+
+    //Convert adc_reading to voltage in mV
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &adcChars);
+
+    return voltage;
+}
+
+int PinFunctions::ReadAnalog2(AdcChannel2 pinNr)
+{
+    CheckEfuse();
+
+    adc2_config_channel_atten(pinNr, atten);
+
+    esp_adc_cal_characteristics_t adcChars;
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_2, atten, ADC_WIDTH_BIT_12, DEFAULT_VREF, &adcChars);
+    uint32_t adc_reading = 0;
+
+    //Multisampling
+    for (int i = 0; i < NO_OF_SAMPLES; i++) 
+    {
+        int raw;
+        esp_err_t errorCheck = adc2_get_raw((adc2_channel_t)pinNr, ADC_WIDTH_BIT_12, &raw);
+        if (errorCheck != ESP_OK)
+        {
+            ESP_LOGW(PINS_TAG, "%s : read failed channel adc 2 nr %d esp error code %s", __func__, pinNr, esp_err_to_name(errorCheck));
+            return -1;
+        }
+        adc_reading += raw;
+    }
+
+    adc_reading /= NO_OF_SAMPLES;
+
+    //Convert adc_reading to voltage in mV
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &adcChars);
+
+    return voltage;
 }
 
 static std::map<ledc_channel_t, bool> occupiedChannel = {

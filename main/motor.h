@@ -18,9 +18,9 @@ const int A_MAX_FORWARD_RANGE_DEG = 20;
 const int A_MAX_BACKWARD_RANGE_DEG = 20;
 
 const int B_MAX_FORWARD_RANGE_DEG = 20;
-const int B_MAX_BACKWARD_RANGE_DEG = 25;
+const int B_MAX_BACKWARD_RANGE_DEG = 20;
 
-
+const int MAX_ROTATION = 20;
 
 
 class MotorController {
@@ -40,6 +40,8 @@ public:
 	void SetBToDeg(int degrees);
 
 	void StepAByDeg(int howManyDegrees);
+	void StepBByDeg(int howManyDegrees);
+
 
 	void StepAOneDeg();
 	void StepAMinusOneDeg();

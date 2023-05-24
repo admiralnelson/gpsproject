@@ -1,6 +1,9 @@
 #include <Helios.h>
 
 
+
+
+
 double Cjulian;
 double dDecimalHours;
 double dEclipticLongitude;
@@ -12,6 +15,8 @@ double dMeanAnomaly;
 double dOmega;
 double dY;
 double dX;
+
+
 
 void Helios::getPos(int year,int month,int day,double hours,double minutes,double seconds,double longitude,double latitude){
 						  double dJulianDate;

@@ -2,6 +2,14 @@
 #include "algorithm"
 #include "stdint.h"
 #include <string>
+#include "cmath"
+
+struct Vector3
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+};
 
 
 struct DateTime
@@ -14,7 +22,6 @@ struct DateTime
     int second;
 };
 
-
 template <typename T>
 T clamp(T val, T min, T max) {
     return std::min(std::max(val, min), max);
@@ -25,6 +32,25 @@ T map(T value, T fromLow, T fromHigh, T toLow, T toHigh) {
     return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
 }
 
+template<typename _Tp>
+constexpr bool
+IsBetween(const _Tp& __val, const _Tp& __lo, const _Tp& __hi)
+{
+    return __lo >= __val && __val <= __hi;
+}
+
+
+inline double rad2deg(double raddian)
+{
+    return raddian * 180.0 / M_PI;
+}
+
+inline double deg2rad(double deg)
+{
+    return deg * M_PI / 180.0;
+}
+
+
 uint64_t GetSystemMilliseconds();
 void Delay(uint64_t howLongInMilliseconds);
 
@@ -32,3 +58,4 @@ bool SetDateAndTime(const std::string& dateTimeString);
 long GetCurrentSystemDateTime();
 DateTime GetCurrentSystemDateTimeStruct();
 std::string GetCurrentSystemDateTimeAsString();
+
