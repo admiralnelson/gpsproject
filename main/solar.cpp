@@ -237,6 +237,7 @@ void app_main()
 			}
 			else if (command == "startsolaropen")
 			{
+				SolarTrackingClosedLoop::Get().Stop();
 				SolarTrackingOpenLoop::Get().Start();
 			}
 			else if (command == "stopsolaropen")
@@ -252,6 +253,15 @@ void app_main()
 
 				std::cout << "in mV: ldr1 " << ldr1 << ", ldr2 " << ldr2 << ", ldr3 " << ldr3 << ", ldr4 " << ldr4 << std::endl;
 
+			}
+			else if (command == "startsolarclosed")
+			{
+				SolarTrackingOpenLoop::Get().Stop();
+				SolarTrackingClosedLoop::Get().Start(); 
+			}
+			else if (command == "stopsolarclosed")
+			{
+				SolarTrackingClosedLoop::Get().Stop();
 			}
 			else if (std::regex_match(command, match, pattern))
 			{

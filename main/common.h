@@ -11,6 +11,12 @@ struct Vector3
     double z = 0;
 };
 
+template <typename T>
+struct MinMax {
+    T Min = 0;
+    T Max = 0;
+};
+
 
 struct DateTime
 {

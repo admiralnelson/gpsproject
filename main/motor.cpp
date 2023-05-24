@@ -327,6 +327,30 @@ void MotorController::StepBByDeg(int howManyDegrees)
     }
 }
 
+void MotorController::StepAOneDeg()
+{
+    const int stepRotationByOne = this->CurrentMotorADegree + 1;
+    this->SetAToDeg(stepRotationByOne);
+}
+
+void MotorController::StepAMinusOneDeg()
+{
+    const int stepRotationByMinusOne = this->CurrentMotorADegree - 1;
+    this->SetAToDeg(stepRotationByMinusOne);
+}
+
+void MotorController::StepBOneDeg()
+{
+    const int stepRotationByOne = this->CurrentMotorBDegree + 1;
+    this->SetBToDeg(stepRotationByOne);
+}
+
+void MotorController::StepBMinusOneDeg()
+{
+    const int stepRotationByMinusOne = this->CurrentMotorADegree - 1;
+    this->SetBToDeg(stepRotationByMinusOne);
+}
+
 void MotorController::StepAForward()
 {
     if (this->MotorMovementStatus != MotorMovement::Stopped)

@@ -6,6 +6,7 @@ public:
 	static PowerMonitor& Get();
 
 	float Voltage();
+	float Current();
 
 private:
 	PowerMonitor(PowerMonitor const&) = delete;
