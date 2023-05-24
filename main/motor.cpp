@@ -347,7 +347,7 @@ void MotorController::StepBOneDeg()
 
 void MotorController::StepBMinusOneDeg()
 {
-    const int stepRotationByMinusOne = this->CurrentMotorADegree - 1;
+    const int stepRotationByMinusOne = this->CurrentMotorBDegree - 1;
     this->SetBToDeg(stepRotationByMinusOne);
 }
 

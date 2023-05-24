@@ -188,10 +188,10 @@ void SolarTrackingClosedLoop::UpdateLdr()
 	const int Ldr3 = PinFunctions::ReadAnalog1(LDR_3_PIN);
 	const int Ldr4 = PinFunctions::ReadAnalog1(LDR_4_PIN);
 
-	this->ldrArray.N = this->Map(Ldr4, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.N = this->Map(Ldr2, ADC2_RANGE.Min, ADC2_RANGE.Max, 0.0F, 1.0F);
 	this->ldrArray.W = this->Map(Ldr1, ADC2_RANGE.Min, ADC2_RANGE.Max, 0.0F, 1.0F);
 	this->ldrArray.E = this->Map(Ldr3, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
-	this->ldrArray.S = this->Map(Ldr2, ADC2_RANGE.Min, ADC2_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.S = this->Map(Ldr4, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
 
 	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "updating sensors ldr1 W %d mapped %f", Ldr1, this->ldrArray.W);
 	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "updating sensors ldr2 S %d mapped %f", Ldr2, this->ldrArray.S);
@@ -201,15 +201,17 @@ void SolarTrackingClosedLoop::UpdateLdr()
 
 void SolarTrackingClosedLoop::UpdateHorizontal()
 {
-	if (this->IsBetweenTolerance(this->ldrArray.W - this->ldrArray.E, this->treshold.Horizontal.Min, this->treshold.Horizontal.Max))
+	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference W - E = %f", (this->ldrArray.W - this->ldrArray.E));
+	if (this->IsBetweenTolerance(this->ldrArray.W - this->ldrArray.E, this->treshold.Horizontal.Min, -0.1) || 
+		this->IsBetweenTolerance(this->ldrArray.W - this->ldrArray.E, 0.1, this->treshold.Horizontal.Max))
 	{
-		if ((this->ldrArray.W - this->ldrArray.E) > 0)
+		if (this->ldrArray.W > this->ldrArray.E)
 		{
-			MotorController::Get().StepBOneDeg();
+			MotorController::Get().StepAMinusOneDeg();
 		}
-		if ((this->ldrArray.W - this->ldrArray.E) < 0)
+		if (this->ldrArray.W < this->ldrArray.E)
 		{
-			MotorController::Get().StepBMinusOneDeg();
+			MotorController::Get().StepAOneDeg();
 		}
 	}
 
@@ -217,15 +219,17 @@ void SolarTrackingClosedLoop::UpdateHorizontal()
 
 void SolarTrackingClosedLoop::UpdateVertical()
 {
-	if (this->IsBetweenTolerance(this->ldrArray.N - this->ldrArray.S, this->treshold.Vertical.Min, this->treshold.Vertical.Max))
+	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference N - S = %f", (this->ldrArray.N - this->ldrArray.S));
+	if (this->IsBetweenTolerance(this->ldrArray.N - this->ldrArray.S, this->treshold.Vertical.Min, -0.1) ||
+		this->IsBetweenTolerance(this->ldrArray.N - this->ldrArray.S, 0.1, this->treshold.Vertical.Max) )
 	{
-		if ((this->ldrArray.N - this->ldrArray.S) > 0)
+		if (this->ldrArray.N > this->ldrArray.S)
 		{
-			MotorController::Get().StepAOneDeg();
+			MotorController::Get().StepBOneDeg();
 		}
-		if ((this->ldrArray.N - this->ldrArray.S) < 0)
+		if (this->ldrArray.N < this->ldrArray.S)
 		{
-			MotorController::Get().StepAMinusOneDeg();
+			MotorController::Get().StepBMinusOneDeg();
 		}
 	}
 }
