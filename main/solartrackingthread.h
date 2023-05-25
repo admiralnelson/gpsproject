@@ -67,12 +67,12 @@ private:
 	struct Threshold 
 	{
 		const struct MinMax<float> Horizontal = {
-			.Min = -0.5,
-			.Max = 0.5
+			.Min = 0.1,
+			.Max = 1
 		};
 		const struct MinMax<float> Vertical = {
-			.Min = -0.5,
-			.Max = 0.5
+			.Min = 0.1,
+			.Max = 1
 		};
 	};
 

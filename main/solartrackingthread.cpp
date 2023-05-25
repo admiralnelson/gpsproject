@@ -201,9 +201,8 @@ void SolarTrackingClosedLoop::UpdateLdr()
 
 void SolarTrackingClosedLoop::UpdateHorizontal()
 {
-	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference W - E = %f", (this->ldrArray.W - this->ldrArray.E));
-	if (this->IsBetweenTolerance(this->ldrArray.W - this->ldrArray.E, this->treshold.Horizontal.Min, -0.1) || 
-		this->IsBetweenTolerance(this->ldrArray.W - this->ldrArray.E, 0.1, this->treshold.Horizontal.Max))
+	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference W - E = %f", std::abs(this->ldrArray.W - this->ldrArray.E));
+	if (this->IsBetweenTolerance(std::abs(this->ldrArray.W - this->ldrArray.E), this->treshold.Horizontal.Min, this->treshold.Horizontal.Max))
 	{
 		if (this->ldrArray.W > this->ldrArray.E)
 		{
@@ -219,9 +218,8 @@ void SolarTrackingClosedLoop::UpdateHorizontal()
 
 void SolarTrackingClosedLoop::UpdateVertical()
 {
-	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference N - S = %f", (this->ldrArray.N - this->ldrArray.S));
-	if (this->IsBetweenTolerance(this->ldrArray.N - this->ldrArray.S, this->treshold.Vertical.Min, -0.1) ||
-		this->IsBetweenTolerance(this->ldrArray.N - this->ldrArray.S, 0.1, this->treshold.Vertical.Max) )
+	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "difference N - S = %f", std::abs(this->ldrArray.N - this->ldrArray.S));
+	if (this->IsBetweenTolerance(std::abs(this->ldrArray.N - this->ldrArray.S), this->treshold.Vertical.Min, this->treshold.Vertical.Max))
 	{
 		if (this->ldrArray.N > this->ldrArray.S)
 		{
