@@ -38,8 +38,6 @@ bool SetDateAndTime(const std::string& dateTimeString)
 
 }
 
-
-
 long GetCurrentSystemDateTime()
 {
     struct timeval tv;
@@ -72,3 +70,4 @@ DateTime GetCurrentSystemDateTimeStruct()
     dt.second = tm->tm_sec;
     return dt;
 }
+

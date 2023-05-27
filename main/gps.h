@@ -42,25 +42,3 @@ private:
 
 	Gps();
 };
-
-class MovingAverageFilter {
-public:
-	MovingAverageFilter(int windowSize) : windowSize(windowSize) {}
-
-	double Filter(double value) 
-	{
-		if (values.size() >= windowSize) 
-		{
-			sum -= values.front();
-			values.pop();
-		}
-		values.push(value);
-		sum += value;
-		return sum / values.size();
-	}
-
-private:
-	int windowSize;
-	double sum = 0;
-	std::queue<double> values;
-};

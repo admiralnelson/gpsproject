@@ -70,6 +70,10 @@ void app_main()
 	int DegB = 0;
 	//MotorController::Get().Reset();
 
+	//I2CMaster I2CDeviceManager(21, 22, I2C_NUM_0);
+	//I2CDeviceManager::Get();
+
+
 	std::cout << "enter a command milord: ";
 	while (true)
 	{
@@ -254,6 +258,28 @@ void app_main()
 				std::cout << "in mV: ldr1 " << ldr1 << ", ldr2 " << ldr2 << ", ldr3 " << ldr3 << ", ldr4 " << ldr4 << std::endl;
 
 			}
+			else if (command == "testvoltage")
+			{
+				int voltageADC = PinFunctions::ReadAnalog1(ADC1_CHANNEL_6);
+				std::cout << "in mV " << voltageADC<< std::endl;
+
+			}
+			else if (command == "h")
+			{
+				std::thread t([] {
+					while (true) {
+						float voltage = PowerMonitor::Get().Current();
+						//std::cout << "A : " << voltage << std::endl;
+						Delay(100);
+					}
+					});
+				t.join();
+			}
+			else if (command == "getcurrent")
+			{
+				float voltage = PowerMonitor::Get().Current();
+				std::cout << "V : " << voltage << std::endl;
+			}
 			else if (command == "startsolarclosed")
 			{
 				SolarTrackingOpenLoop::Get().Stop();
@@ -263,6 +289,7 @@ void app_main()
 			{
 				SolarTrackingClosedLoop::Get().Stop();
 			}
+
 			else if (std::regex_match(command, match, pattern))
 			{
 				std::string dateTimeString = match[1];
@@ -272,22 +299,6 @@ void app_main()
 					std::cout << "set date and time is done milord. current system time is " << GetCurrentSystemDateTimeAsString() << std::endl;
 				}
 			}
-
-			//else if (command == "deg(b, 20)")
-			//{
-			//	MotorController::Get().SetBToDeg(20);
-			//	std::cout << "done" << std::endl;
-			//}
-			//else if (command == "deg(b,-25)")
-			//{
-			//	MotorController::Get().SetBToDeg(-25);
-			//	std::cout << "done" << std::endl;
-			//}
-			//else if (command == "reset")
-			//{
-			//	MotorController::Get().Reset();
-			//	std::cout << "done" << std::endl;
-			//}
 			else
 			{
 

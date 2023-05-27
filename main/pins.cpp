@@ -5,9 +5,13 @@
 #include "vector"
 #include "map"
 #include "esp_log.h"
+#include "freertos/task.h"
+#include "string.h"
+
 
 #define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
 #define NO_OF_SAMPLES   64          //Multisampling
+#define TIMEOUT_MS      1000
 
 static const adc_atten_t atten = ADC_ATTEN_DB_0;
 
@@ -259,5 +263,5 @@ PWMPin::~PWMPin()
     occupiedChannel[(ledc_channel_t)this->channelNr] = false;
     ESP_LOGI(PINS_TAG, "PWM pin destroyed pinNr %lu", this->pinNr);
     ESP_LOGI(PINS_TAG, "removing occupied timer %lu and channelNr %lu", this->timerNr, this->channelNr);
-
 }
+
