@@ -23,6 +23,12 @@
 #include "gps.h"
 #include <regex> 
 #include "solartrackingthread.h"
+#include "filesystem.h"
+#include "pages_controller.h"
+#include "api_controller.h"
+
+#include "wifi.h"
+#include "webserver.h"
 
 #ifdef __INTELLISENSE__
 #pragma diag_suppress 20
@@ -72,6 +78,25 @@ void app_main()
 
 	//I2CMaster I2CDeviceManager(21, 22, I2C_NUM_0);
 	//I2CDeviceManager::Get();
+
+	Wifi::Get().StartAP("Garden system");
+
+	HTTPServer Server(80, 40);
+	PagesController::Get().Register(Server);
+	ApiController::Get().Register(Server);
+	
+
+	Server.RegisterURI("/helloworld", [](HTTPRequest& Request)
+	{
+		Request.SendReply("hello world");
+		std::cout << "hello world was opened" << std::endl;
+	});
+
+	Wifi::Get().RegisterWiFiEvent(WIFI_EVENT_STA_CONNECTED, "wifi connected",
+	[](void* Data)
+	{
+		ESP_LOGI(TAG, "wifi connected");
+	});
 
 
 	std::cout << "enter a command milord: ";
@@ -268,8 +293,11 @@ void app_main()
 			{
 				std::thread t([] {
 					while (true) {
-						float voltage = PowerMonitor::Get().Current();
-						//std::cout << "A : " << voltage << std::endl;
+						float current = PowerMonitor::Get().Current();
+						float voltage = PowerMonitor::Get().Voltage();
+						float power = PowerMonitor::Get().Power();
+
+						std::cout << "A : " << current << "  V:  " << voltage << " P : " << power << std::endl;
 						Delay(100);
 					}
 					});
@@ -289,7 +317,25 @@ void app_main()
 			{
 				SolarTrackingClosedLoop::Get().Stop();
 			}
-
+			else if (command == "dir")
+			{
+				FileSystem::Get().PrintDirs("/");
+				FileSystem::Get().PrintDirs("/data/");
+				std::cout << "free space " << FileSystem::Get().GetFreeDiscSpace() << "/" << FileSystem::Get().GetDiscSize() << std::endl;
+			}
+			else if (command == "openfile")
+			{
+				std::string data;
+				bool bExisst = FileSystem::Get().LoadFile("/data/index.htm", data);;
+				if (bExisst)
+				{
+					std::cout << data << std::endl;
+				}
+				else
+				{
+					std::cout << "data not found" << std::endl;
+				}
+			}
 			else if (std::regex_match(command, match, pattern))
 			{
 				std::string dateTimeString = match[1];

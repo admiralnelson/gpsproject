@@ -12,6 +12,8 @@ public:
 	bool IsRunning();
 
 	void Update();
+	double GetAzimuth();
+	double GetElevation();
 
 private:
 	bool bIsRunning = false;
@@ -19,12 +21,14 @@ private:
 	SolarTrackingOpenLoop();
 	SolarTrackingOpenLoop(SolarTrackingOpenLoop const&) = delete;
 
+	double azimuth = 0;
+	double elevation = 0;
 };
 
-const AdcChannel2 LDR_1_PIN = ADC2_CHANNEL_0;
-const AdcChannel2 LDR_2_PIN = ADC2_CHANNEL_3;
-const AdcChannel1 LDR_3_PIN = ADC1_CHANNEL_3;
-const AdcChannel1 LDR_4_PIN = ADC1_CHANNEL_0;
+const AdcChannel1 LDR_1_PIN = ADC1_CHANNEL_0;
+const AdcChannel1 LDR_2_PIN = ADC1_CHANNEL_3;
+const AdcChannel1 LDR_3_PIN = ADC1_CHANNEL_6;
+const AdcChannel1 LDR_4_PIN = ADC1_CHANNEL_7;
 
 const MinMax<int> ADC1_RANGE = {
 	.Min = 75,
@@ -39,12 +43,23 @@ const MinMax<int> ADC2_RANGE = {
 class SolarTrackingClosedLoop
 {
 public:
+	struct LdrArray
+	{
+		float N = 0;
+		float W = 0;
+		float S = 0;
+		float E = 0;
+	};
+
+public:
 	static SolarTrackingClosedLoop& Get();
 	bool Start();
 	bool Stop();
 	bool IsRunning();
 
 	void Update();
+
+	LdrArray GetArrayLdr();
 
 private:
 	bool IsBetweenTolerance(float value, float min, float max);
@@ -56,15 +71,8 @@ private:
 	void UpdateVertical();
 
 private:
-	struct LdrArray 
-	{
-		float N = 0;
-		float W = 0;
-		float S = 0;
-		float E = 0;
-	};
 
-	struct Threshold 
+	struct Threshold
 	{
 		const struct MinMax<float> Horizontal = {
 			.Min = 0.1,
@@ -85,4 +93,3 @@ private:
 	SolarTrackingClosedLoop(SolarTrackingClosedLoop const&) = delete;
 
 };
-

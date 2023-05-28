@@ -104,11 +104,24 @@ void SolarTrackingOpenLoop::Update()
 
 	azimuth = rad2deg(sin(deg2rad(azimuth)));
 
+	this->azimuth = azimuth;
+	this->elevation = elevation;
+
 	ESP_LOGI(SOLAR_TRACKER_THREAD_TAG, "current longitute %f latitude %f altitude %f", longitude, latitude, altitute);
 	ESP_LOGI(SOLAR_TRACKER_THREAD_TAG, "moving the motor azimuth %f elevation %f", azimuth, elevation);
 
 	MotorController::Get().SetAToDeg((int)ceil(azimuth));
 	MotorController::Get().SetBToDeg((int)ceil(elevation));
+}
+
+double SolarTrackingOpenLoop::GetAzimuth()
+{
+	return this->azimuth;
+}
+
+double SolarTrackingOpenLoop::GetElevation()
+{
+	return this->elevation;
 }
 
 static void ClosedLoopThread(void* thisPtr)
@@ -171,6 +184,11 @@ void SolarTrackingClosedLoop::Update()
 	this->UpdateVertical();
 }
 
+SolarTrackingClosedLoop::LdrArray SolarTrackingClosedLoop::GetArrayLdr()
+{
+	return this->ldrArray;
+}
+
 bool SolarTrackingClosedLoop::IsBetweenTolerance(float value, float min, float max)
 {
 	return value >= min && value <= max;
@@ -183,15 +201,15 @@ float SolarTrackingClosedLoop::Map(int value, int minMilliVolt, int maxMilliVolt
 
 void SolarTrackingClosedLoop::UpdateLdr()
 {
-	const int Ldr1 = PinFunctions::ReadAnalog2(LDR_1_PIN);
-	const int Ldr2 = PinFunctions::ReadAnalog2(LDR_2_PIN);
+	const int Ldr1 = PinFunctions::ReadAnalog1(LDR_1_PIN);
+	const int Ldr2 = PinFunctions::ReadAnalog1(LDR_2_PIN);
 	const int Ldr3 = PinFunctions::ReadAnalog1(LDR_3_PIN);
 	const int Ldr4 = PinFunctions::ReadAnalog1(LDR_4_PIN);
 
-	this->ldrArray.N = this->Map(Ldr2, ADC2_RANGE.Min, ADC2_RANGE.Max, 0.0F, 1.0F);
-	this->ldrArray.W = this->Map(Ldr1, ADC2_RANGE.Min, ADC2_RANGE.Max, 0.0F, 1.0F);
-	this->ldrArray.E = this->Map(Ldr3, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
-	this->ldrArray.S = this->Map(Ldr4, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.N = this->Map(Ldr4, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.W = this->Map(Ldr3, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.E = this->Map(Ldr1, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
+	this->ldrArray.S = this->Map(Ldr2, ADC1_RANGE.Min, ADC1_RANGE.Max, 0.0F, 1.0F);
 
 	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "updating sensors ldr1 W %d mapped %f", Ldr1, this->ldrArray.W);
 	ESP_LOGI(SOLAR_TRACKER_THREAD_CLOSED_TAG, "updating sensors ldr2 S %d mapped %f", Ldr2, this->ldrArray.S);

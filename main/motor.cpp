@@ -8,10 +8,39 @@ const char* PERSISTENCE_MOTOR_A_DEG = "MOTORA_DEG";
 const char* PERSISTENCE_MOTOR_B_DEG = "MOTORB_DEG";
 const char* MOTOR_TAG = "MotorController";
 
+const char* PERSISTENCE_MOTOR_A_REAL_TIME_DEG = "MOTORADEGR";
+const char* PERSISTENCE_MOTOR_B_REAL_TIME_DEG = "MOTORBDEGR";
+
+
 MotorController& MotorController::Get()
 {
     static MotorController instance;
     return instance;
+}
+
+MotorController::MotorMovement MotorController::GetStatus()
+{
+    return this->MotorMovementStatus;
+}
+
+int MotorController::GetRealTimeADeg()
+{
+    return this->RealTimeMotorADegree;
+}
+
+int MotorController::GetRealTimeBDeg()
+{
+    return this->RealTimeMotorBDegree;
+}
+
+int MotorController::GetDegreeA()
+{
+    return this->CurrentMotorADegree;
+}
+
+int MotorController::GetDegreeB()
+{
+    return this->CurrentMotorBDegree;
 }
 
 
@@ -283,14 +312,20 @@ void MotorController::StepAByDeg(int howManyDegrees)
     {
         for (int i = 1; i <= std::abs(howManyDegrees); i++)
         {
+            this->RealTimeMotorADegree -= 1;
             this->StepABackward();
+            this->RealTimeMotorADegree = std::clamp(this->RealTimeMotorADegree, -A_MAX_BACKWARD_RANGE_DEG, A_MAX_FORWARD_RANGE_DEG);
+            Persistence::Get().WriteInt(PERSISTENCE_MOTOR_A_REAL_TIME_DEG, this->RealTimeMotorADegree);
         }
     }
     else
     {
         for (int i = 1; i <= std::abs(howManyDegrees); i++)
         {
+            this->RealTimeMotorADegree += 1;
             this->StepAForward();
+            this->RealTimeMotorADegree = std::clamp(this->RealTimeMotorADegree, -A_MAX_BACKWARD_RANGE_DEG, A_MAX_FORWARD_RANGE_DEG);
+            Persistence::Get().WriteInt(PERSISTENCE_MOTOR_A_REAL_TIME_DEG, this->RealTimeMotorADegree);
         }
     }
 }
@@ -315,14 +350,20 @@ void MotorController::StepBByDeg(int howManyDegrees)
     {
         for (int i = 1; i <= std::abs(howManyDegrees); i++)
         {
+            this->RealTimeMotorBDegree -= 1;
             this->StepBBackward();
+            this->RealTimeMotorBDegree = std::clamp(this->RealTimeMotorBDegree, -B_MAX_BACKWARD_RANGE_DEG, B_MAX_FORWARD_RANGE_DEG);
+            Persistence::Get().WriteInt(PERSISTENCE_MOTOR_B_REAL_TIME_DEG, this->RealTimeMotorBDegree);
         }
     }
     else
     {
         for (int i = 1; i <= std::abs(howManyDegrees); i++)
         {
+            this->RealTimeMotorBDegree += 1;
             this->StepBForward();
+            this->RealTimeMotorBDegree = std::clamp(this->RealTimeMotorBDegree, -B_MAX_BACKWARD_RANGE_DEG, B_MAX_FORWARD_RANGE_DEG);
+            Persistence::Get().WriteInt(PERSISTENCE_MOTOR_B_REAL_TIME_DEG, this->RealTimeMotorBDegree);
         }
     }
 }
@@ -428,6 +469,10 @@ MotorController::MotorController()
     auto prevADeg = Persistence::Get().GetInt(PERSISTENCE_MOTOR_A_DEG);
     auto prevBDeg = Persistence::Get().GetInt(PERSISTENCE_MOTOR_B_DEG);
 
+    auto prevADegReal = Persistence::Get().GetInt(PERSISTENCE_MOTOR_A_REAL_TIME_DEG);
+    auto prevBDegReal = Persistence::Get().GetInt(PERSISTENCE_MOTOR_B_REAL_TIME_DEG);
+
+
     if (!prevADeg.Existed)
     {
         Persistence::Get().WriteInt(PERSISTENCE_MOTOR_A_DEG, 0);
@@ -438,6 +483,18 @@ MotorController::MotorController()
         ESP_LOGI(MOTOR_TAG, "loading saved degress A %d B %d", prevADeg.Result, prevBDeg.Result);
         this->CurrentMotorADegree = prevADeg.Result;
         this->CurrentMotorBDegree = prevBDeg.Result;
+    }
+
+    if (!prevADegReal.Existed)
+    {
+        Persistence::Get().WriteInt(PERSISTENCE_MOTOR_A_REAL_TIME_DEG, 0);
+        Persistence::Get().WriteInt(PERSISTENCE_MOTOR_B_REAL_TIME_DEG, 0);
+    }
+    else
+    {
+        ESP_LOGI(MOTOR_TAG, "loading saved real time degress A %d B %d", prevADegReal.Result, prevBDegReal.Result);
+        this->RealTimeMotorADegree = prevADegReal.Result;
+        this->RealTimeMotorBDegree = prevADegReal.Result;
     }
 
     this->MotorAForward.reset(new PWMPin(PIN_CHANNEL_A_FORWARD, FREQUENCY));

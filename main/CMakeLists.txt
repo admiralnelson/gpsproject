@@ -8,3 +8,4 @@ set(COMPONENT_ADD_INCLUDEDIRS ".")
 register_component()
 
 
+littlefs_create_partition_image(data ../data FLASH_IN_PROJECT)

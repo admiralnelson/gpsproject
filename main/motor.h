@@ -36,6 +36,14 @@ class MotorController {
 public:
 	static MotorController& Get();
 
+	MotorMovement GetStatus();
+
+	int GetRealTimeADeg();
+	int GetRealTimeBDeg();
+
+	int GetDegreeA();
+	int GetDegreeB();
+
 	void SetAToDeg(int degrees);
 	void SetBToDeg(int degrees);
 
@@ -74,4 +82,8 @@ private:
 
 	int CurrentMotorADegree = 0;
 	int CurrentMotorBDegree = 0;
+
+	int RealTimeMotorADegree = 0;
+	int RealTimeMotorBDegree = 0;
+
 };

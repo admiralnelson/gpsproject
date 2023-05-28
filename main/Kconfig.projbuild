@@ -1,0 +1,110 @@
+menu "LCD Display Configuration"
+
+config I2C_MASTER_SCL
+    int "I2C Master SCL GPIO number"
+	range 0 34
+	default 19
+	help
+		GPIO number (IOxx) for I2C SCL.
+
+		Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+		GPIOs 35-39 are input-only so cannot be used to drive the One Wire Bus.
+
+config I2C_MASTER_SDA
+    int "I2C Master SDA GPIO number"
+    range 0 34
+    default 18
+    help
+        GPIO number (IOxx) for I2C SDA.
+
+        Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+        GPIOs 35-39 are input-only so cannot be used to drive the One Wire Bus.
+
+config LCD1602_I2C_ADDRESS
+    hex "I2C Address for LCD1602 device"
+    default 0x27
+    help
+        I2C address for HD44780-compatible LCD1602 device.
+
+endmenu
+
+menu "Button Configuration"
+
+config BUTTON_UP
+    int "GPIO connected to button up"
+	range 0 34
+	default 27
+	help
+		GPIO number (IOxx) for button up.
+
+		Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+		Do not use GPIOs 35-39.
+
+config BUTTON_DOWN
+    int "GPIO connected to button down"
+    range 0 34
+    default 14
+    help
+        GPIO number (IOxx) for button down.
+
+        Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+		Do not use GPIOs 35-39.
+				
+config BUTTON_LEFT
+    int "GPIO connected to button left"
+    range 0 34
+    default 13
+    help
+        GPIO number (IOxx) for button left.
+
+        Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+		Do not use GPIOs 35-39.
+
+config BUTTON_RIGHT
+    int "GPIO connected to button right"
+    range 0 34
+    default 12
+    help
+        GPIO number (IOxx) for button right.
+
+        Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+		Do not use GPIOs 35-39.
+
+
+endmenu
+
+menu "HTTP Server"
+
+config HTTPD_MAX_REQ_HDR_LEN
+    int "Max HTTP Request Header Length"
+    default 512
+    help
+        This sets the maximum supported size of headers section in HTTP request packet to be processed by the server
+
+config HTTPD_MAX_URI_LEN
+    int "Max HTTP URI Length"
+    default 512
+    help
+        This sets the maximum supported size of HTTP request URI to be processed by the server
+
+endmenu
+
+
+menu "SNTP"
+
+	config LWIP_SNTP_UPDATE_DELAY
+		int "Request interval to update time (ms)"
+		range 15000 4294967295
+		default 3600000
+		help
+			This option allows you to set the time update period via SNTP.
+			Default is 1 hour. Must not be below 15 seconds by specification.
+			(SNTPv4 RFC 4330 enforces a minimum update time of 15 seconds).
+
+endmenu # SNTP

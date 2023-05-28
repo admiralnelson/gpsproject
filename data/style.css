@@ -1,0 +1,8 @@
+.form-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group label {
+    width: 150px;
+}

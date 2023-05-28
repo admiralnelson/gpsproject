@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solar Tracker Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Solar Tracker Project</h1>
+    <fieldset>
+        <legend>Webclient Status</legend>
+        <h2 id="status">Status</h2>
+    </fieldset>
+    <fieldset>
+        <legend>Controller Status</legend>
+        <h3 id="automaticModeStatus">Stopped</h3>
+    </fieldset>
+    <fieldset>
+        <legend>Motor Status</legend>
+        <div class="form-group">
+            <label for="degreeMotorA">DegreeMotorA:</label>
+            <input type="text" id="degreeMotorA" name="degreeMotorA" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="degreeMotorB">DegreeMotorB:</label>
+            <input type="text" id="degreeMotorB" name="degreeMotorB" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="motorControllerStatus">MotorControllerStatus:</label>
+            <input type="text" id="motorControllerStatus" name="motorControllerStatus" readonly><br><br>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Light Sensor</legend>
+        <div class="form-group">
+            <label for="ldrn">LDR N:</label>
+            <input type="text" id="ldrn" name="ldrn" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="ldrs">LDR S:</label>
+            <input type="text" id="ldrs" name="ldrs" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="ldrw">LDR W:</label>
+            <input type="text" id="ldrw" name="ldrw" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="ldre">LDR E:</label>
+            <input type="text" id="ldre" name="ldre" readonly><br><br>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>GPS</legend>
+        <div class="form-group">
+            <label for="long">Longitude:</label>
+            <input type="text" id="long" name="long" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="lat">Latitude:</label>
+            <input type="text" id="lat" name="lat" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="alt">Altitude:</label>
+            <input type="text" id="alt" name="alt" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="azi">Azimuth:</label>
+            <input type="text" id="azi" name="azi" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="elev">Elevation:</label>
+            <input type="text" id="elev" name="elev" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="time">Time:</label>
+            <input type="text" id="time" name="time" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="browserTime">Browser Time:</label>
+            <input type="text" id="browserTime" name="browserTime" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="openloopstatus">Open Loop is running:</label>
+            <input type="checkbox" id="openloopstatus" name="openloopstatus" disabled><br><br>
+        </div>
+        <div class="form-group">
+            <label for="closedloopstatus">Closed Loop is running:</label>
+            <input type="checkbox" id="closedloopstatus" name="closedloopstatus" disabled><br><br>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Power</legend>
+        <div class="form-group">
+            <label for="volt">Volt (V):</label>
+            <input type="text" id="volt" name="volt" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="current">Current (A):</label>
+            <input type="text" id="current" name="current" readonly><br><br>
+        </div>
+        <div class="form-group">
+            <label for="power">Power (W):</label>
+            <input type="text" id="power" name="power" readonly><br><br>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Override Manual</legend>
+        <button id="MoveAMax">MoveAMax</button>
+        <button id="MoveAMin">MoveAMin</button>
+        <button id="MoveBMax">MoveBMax</button>
+        <button id="MoveBMin">MoveBMin</button>
+        <button id="ResetAll">ResetAll</button>
+        <button id="StepAPos">StepAPos</button>
+        <button id="StepANeg">StepANeg</button>
+        <button id="StepBPos">StepBPos</button>
+        <button id="StepBNeg">StepBNeg</button>
+        <button id="OverrideStepAPos">OverrideStepAPos</button>
+        <button id="OverrideStepANeg">OverrideStepANeg</button>
+        <button id="OverrideStepBPos">OverrideStepBPos</button>
+        <button id="OverrideStepBNeg">OverrideStepBNeg</button>
+    </fieldset>
+    <fieldset>
+        <legend>Automatic Mode</legend>
+        <button id="SyncDate">Sync Date</button>
+        <button id="OpenLoop">Open Loop</button>
+        <button id="ClosedLoop">Closed Loop</button>
+        <button id="Stop">Stop</button>
+    </fieldset>
+    <fieldset>
+        <legend>Other</legend>
+        <button id="Reboot">Reboot system</button>
+    </fieldset>
+    <fieldset>
+        <legend>Data Logs</legend>
+        <button id="Clear">Clear</button>
+        <button id="Download">Download</button>
+        <br />
+        <textarea id="datalogs" readonly
+                  style="margin:10px; width:calc(100% - 20px); height:100%; min-height: 400px; font-family:'Consolas'">
+        </textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Data Logs LDR</legend>
+        <button id="ClearDataLDR">Clear</button>
+        <button id="DownloadDataLDR">Download</button>
+        <br />
+        <textarea id="datalogsLDR" readonly
+                  style="margin:10px; width:calc(100% - 20px); height:100%; min-height: 400px; font-family:'Consolas'">
+        </textarea>
+    </fieldset>
+    <script src="script.js"></script>
+</body>
+</html>
