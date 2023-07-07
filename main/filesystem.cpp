@@ -285,6 +285,27 @@ bool FileSystem::AppendFile(const char* Path, const std::string& Data)
     return false;
 }
 
+bool FileSystem::GetFileInfo(const char* Path, FileInfo& fileinfo)
+{
+    //if (!IsFileExists(Path)) return false;
+
+    FileInfo File;
+    std::string FilePath = Path;
+    File.Path = Path;
+    struct stat FileStat;
+    memset(&FileStat, 0, sizeof(FileStat)); 
+    stat(FilePath.data(), &FileStat);
+    File.FileName = Path;
+
+    File.bIsDir = false;
+    File.ModifiedTime = FileStat.st_mtime;
+    File.Size = FileStat.st_size;
+    
+
+    fileinfo = File;
+    return true;
+}
+
 bool FileSystem::InitLittleFS()
 {
     if (bSPIFFSHasInited)

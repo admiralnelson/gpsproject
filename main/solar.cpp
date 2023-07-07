@@ -26,6 +26,7 @@
 #include "filesystem.h"
 #include "pages_controller.h"
 #include "api_controller.h"
+#include "logger.h"
 
 #include "wifi.h"
 #include "webserver.h"
@@ -79,8 +80,8 @@ void app_main()
 	//I2CMaster I2CDeviceManager(21, 22, I2C_NUM_0);
 	//I2CDeviceManager::Get();
 
-	Wifi::Get().StartAP("Garden system");
-
+	Wifi::Get().StartAP("SolarTrack system");
+	//Logger::Start();
 	HTTPServer Server(80, 40);
 	PagesController::Get().Register(Server);
 	ApiController::Get().Register(Server);

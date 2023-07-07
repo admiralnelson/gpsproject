@@ -5,6 +5,9 @@
 #include "gps.h"
 #include "power_monitor.h"
 #include "thread"
+#include "filesystem.h"
+#include "logger.h"
+#include "iostream"
 
 ApiController& ApiController::Get()
 {
@@ -43,6 +46,9 @@ void ApiController::Register(HTTPServer& Server)
 	Server.RegisterURI("/SetDate", std::bind(&ApiController::SetDate_POST, this, std::placeholders::_1), HTTP_POST);
 	Server.RegisterURI("/SetCalibration", std::bind(&ApiController::SetCalibration_POST, this, std::placeholders::_1), HTTP_POST);
 
+	Server.RegisterURI("/DownloadPowerLog", std::bind(&ApiController::DownloadPowerLog_GET, this, std::placeholders::_1), HTTP_GET);
+	Server.RegisterURI("/DownloadLDRLog", std::bind(&ApiController::DownloadLdrLog_GET, this, std::placeholders::_1), HTTP_GET);
+	Server.RegisterURI("/ClearLog", std::bind(&ApiController::ClearLog_GET, this, std::placeholders::_1), HTTP_GET);
 
 }
 
@@ -228,6 +234,9 @@ void ApiController::Status_GET(HTTPRequest& Request)
 	object.set("alt", Gps::Get().GetAltitute());
 	object.set("azi", SolarTrackingOpenLoop::Get().GetAzimuth());
 	object.set("elev", SolarTrackingOpenLoop::Get().GetElevation());
+	object.set("memory", (int)(TotalFreeHeap() / 1024));
+	object.set("storage_free", (int)(FileSystem::Get().GetFreeDiscSpace() / 1024));
+	object.set("storage_total", (int)(FileSystem::Get().GetDiscSize() / 1024));
 	object.set("volt", PowerMonitor::Get().Voltage());
 	object.set("current", PowerMonitor::Get().Current());
 	object.set("power", PowerMonitor::Get().Power());
@@ -264,6 +273,61 @@ void ApiController::SetCalibration_POST(HTTPRequest& Request)
 	{
 		Request.SendReply("calibration is set");
 	}
+}
+
+void ApiController::DownloadPowerLog_GET(HTTPRequest& Request)
+{
+	std::string path = Logger::GetPowerLogFilename();
+	std::cout << "opening file " << path << std::endl;
+	std::string out;
+	FileInfo fileinfo;
+	FileSystem::Get().GetFileInfo(path.c_str(), fileinfo);
+	uint32_t len = fileinfo.Size;
+	const uint32_t readChunk = 1024;
+	int currentPosition = 0;
+	Request.SetContentType("text/plain");
+	if (len == 0) {
+		Request.SendError("404 not found " + fileinfo.FileName, HTTPD_404_NOT_FOUND);
+		return;
+	}
+	while (true && currentPosition < len)
+	{
+		FileSystem::Get().LoadFileInChunk(path.c_str(), out, currentPosition, readChunk);
+		currentPosition += readChunk;
+		Request.SendReplyByChunks(out);
+	}
+	Request.SendReply("");
+}
+
+void ApiController::DownloadLdrLog_GET(HTTPRequest& Request)
+{
+	std::string path = Logger::GetLdrLogFilename();
+	std::string out;  
+	std::cout << "opening file " << path << std::endl;
+	FileInfo fileinfo;
+	FileSystem::Get().GetFileInfo(path.c_str(), fileinfo);
+	uint32_t len = fileinfo.Size; 
+	const uint32_t readChunk = 1024;
+	int currentPosition = 0;
+	Request.SetContentType("text/plain");
+	if (len == 0) {
+		Request.SendError("404 not found " + fileinfo.FileName, HTTPD_404_NOT_FOUND);
+		return;
+	}
+	while (true && currentPosition < len) 
+	{
+		FileSystem::Get().LoadFileInChunk(path.c_str(), out, currentPosition, readChunk); 
+		currentPosition += readChunk;
+		Request.SendReplyByChunks(out); 
+	}
+
+	Request.SendReply("");
+}
+
+void ApiController::ClearLog_GET(HTTPRequest& Request)
+{
+	Logger::Clear();
+	Request.SendReply("ok");
 }
 
 ApiController::ApiController() : IControllerBase()

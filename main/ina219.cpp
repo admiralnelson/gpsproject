@@ -141,7 +141,7 @@ ina219_err_t ina219_read_bus_voltage(ina219_handle_t *ina219, float *voltage, ui
         return ret;
     }
 
-    ESP_LOGI(__func__, "raw voltage reading %d", reg_value);
+    //ESP_LOGI(__func__, "raw voltage reading %d", reg_value);
 
     *voltage = (reg_value >> 3) * 0.004;
 
@@ -158,7 +158,7 @@ ina219_err_t ina219_read_power(ina219_handle_t *ina219, float *power, uint16_t t
     }
 
 
-    ESP_LOGI(__func__, "raw reading: %d", (int)reg_value);
+    //ESP_LOGI(__func__, "raw reading: %d", (int)reg_value);
 
     const float ina219_powerMultiplier_mW = 2;
 
@@ -184,7 +184,7 @@ ina219_err_t ina219_read_current(ina219_handle_t *ina219, float *current, uint16
 
     const int normalised = std::clamp((normalisation - reg_value), 0, normalisation);
 
-    ESP_LOGI(__func__, "raw reading: %d, normalised %d", (int)reg_value, normalised);
+    //ESP_LOGI(__func__, "raw reading: %d, normalised %d", (int)reg_value, normalised);
 
     *current = normalised / ina219_currentDivider_mA;//ina219->cal._cur;
 

@@ -36,6 +36,11 @@ private:
 	void Status_GET(HTTPRequest& Request);
 	void SetDate_POST(HTTPRequest& Request);
 	void SetCalibration_POST(HTTPRequest& Request);
+
+	void DownloadPowerLog_GET(HTTPRequest& Request);
+	void DownloadLdrLog_GET(HTTPRequest& Request);
+	void ClearLog_GET(HTTPRequest& Request);
+
 	
 private:
 	ApiController();

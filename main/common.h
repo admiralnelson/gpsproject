@@ -66,6 +66,8 @@ tm GetTmNow();
 //will set the watchdog timer timeout to 0 and triggers cold reboot
 void ColdReboot();
 
+uint32_t TotalFreeHeap();
+
 
 struct Vector3
 {

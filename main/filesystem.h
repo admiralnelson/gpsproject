@@ -48,6 +48,7 @@ public:
 	bool LoadFileInChunk(const char* Path, std::string& Result, int Position = 0, int Length = -1);
 	bool WriteFile(const char* Path, const std::string& Data);
 	bool AppendFile(const char* Path, const std::string& Data);
+	bool GetFileInfo(const char* Path, FileInfo& fileinfo);
 
 private:
 	bool InitLittleFS();

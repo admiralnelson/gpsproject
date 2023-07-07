@@ -53,8 +53,9 @@ float PowerMonitor::Current()
 
 float PowerMonitor::Power()
 {
-	float result = 0;
-	ina219_read_power(&this->ina219Device, &result, TIMEOUT);
+	//float result = 0;
+	float result = this->Current() * this->Voltage();
+	//ina219_read_power(&this->ina219Device, &result, TIMEOUT);
 	return result;
 }
 

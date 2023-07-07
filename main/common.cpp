@@ -132,6 +132,11 @@ void ColdReboot()
 	for (;;);
 }
 
+uint32_t TotalFreeHeap()
+{
+	return esp_get_free_heap_size();
+}
+
 bool ChangeSystemDateTime(long unixEpochSeconds)
 {
     timeval tv;
